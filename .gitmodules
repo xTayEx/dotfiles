@@ -1,0 +1,3 @@
+[submodule "xdg_config_home/.config/nvim"]
+	path = xdg_config_home/.config/nvim
+	url = https://github.com/xTayEx/RubyNVim.git

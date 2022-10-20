@@ -1,0 +1,2 @@
+$ stack build --silent --stack-yaml /home/xtayex/dotfiles/xmonad/.xmonad/stack.yaml
+Progress 0/2            Progress 1/2: xmonad-contrib                            $ stack ghc --stack-yaml /home/xtayex/dotfiles/xmonad/.xmonad/stack.yaml -- --make xmonad.hs -i -ilib -fforce-recomp -main-is main -v0 -outputdir /home/xtayex/.xmonad/build-x86_64-linux -o /home/xtayex/.xmonad/xmonad-x86_64-linux

@@ -1,0 +1,6 @@
+
+xmobar.hs:48:64: error:
+    lexical error in string/character literal at character '\57523'
+   |
+48 |     template = "%UnsafeStdinReader% } { %cpu% %cpu_temp% %fan%  %memory%  %wlp3s0wi%  %battery%  %volume% %brightness%  %date% "
+   |                                                                ^
