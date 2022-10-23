@@ -14,6 +14,7 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeInactive
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.SetWMName
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Layout.Grid
 import XMonad.Layout.IM
@@ -47,6 +48,12 @@ nordColor3 = "#81A1C1"
 nordColor4 :: String
 nordColor4 = "#5E81AC"
 
+nordBlack :: String
+nordBlack = "#434C5E"
+
+nordWhite :: String
+nordWhite = "#ECEFF4"
+
 myUsername :: String
 myUsername = "xtayex"
 
@@ -60,7 +67,7 @@ myFont :: String
 myFont = "xft:FiraCode Nerd Font Mono:size=10,WenQuanYi Micro Hei:size=10"
 
 myPromptFont :: String
-myPromptFont = "xft:FiraCode Nerd Font Mono:size=13,WenQuanYi Micro Hei:size=13"
+myPromptFont = "xft:FiraCode Nerd Font Mono:size=13,WenQuanYi Micro Hei:size=14"
 
 myTabbedFont :: String
 myTabbedFont = "xft:FiraCode Nerd Font Mono:size=11,WenQuanYi Micro Hei:size=11"
@@ -141,7 +148,7 @@ myWorkspaces = clickable workspaceLabels
         , (1, "\xf001", "₆") -- 6
         , (1, "\xf1c2", "₇") -- 7
         , (5, "\xe632", "₈") -- 8
-        , (5, "\xf4a2", "₉") -- 9
+        , (5, "\xf11b", "₉") -- 9
         ]
 
 nonEmptyNonNSPws =
@@ -204,9 +211,7 @@ myStatusBar = "xmobar /home/" ++ myUsername ++ "/.config/xmobar/xmobar.hs"
 -- myStartupHook = spawn "compton --config /home/xtayex/.config/compton.conf"
 --                 >> spawn "feh --bg-fill /home/xtayex/Pictures/wallpapers/yunnan001.jpg"
 myStartupHook :: X ()
-myStartupHook
-    -- spawnOnce "gnome-session"
- = do
+myStartupHook = do
     spawn ("picom --config /home/" ++ myUsername ++ "/.config/picom.conf")
     -- spawn ("feh --bg-fill /home/" ++ myUsername ++ "/Pictures/wallpapers/" ++ myWallpaperPath)
     spawnOnce
@@ -221,6 +226,7 @@ myStartupHook
          "/Downloads/Clash.for.Windows-0.19.14-x64-linux/clash_launch.sh")
     spawn
         ("stalonetray --config /home/" ++ myUsername ++ "/.config/stalonetrayrc")
+    -- setWMName "LG3D"
 
 myLogHook :: Handle -> X ()
 myLogHook xmproc
@@ -270,16 +276,53 @@ myManageHook =
         , title =? "Calendar" --> doFloat
         , title =? "htop" --> doFloat
         , title =? "nmtui" --> doFloat
+        , className =? "Zenity" --> doFloat
+        , className =? "wemeetapp" --> doFloat
         ]
 
-myPromptXPConfig :: XPConfig
-myPromptXPConfig =
+centerPromptXPConfig :: XPConfig
+centerPromptXPConfig =
     def
         { font = myPromptFont
-        , position = CenteredAt 0.4 0.3
         , promptBorderWidth = 0
         , searchPredicate = fuzzyMatch
         , sorter = fuzzySort
+        , maxComplRows = Just 10
+        , fgHLight = nordWhite
+        , bgHLight = nordColor4
+        , historySize = 10
+        , position = CenteredAt 0.4 0.3
+        , bgColor = nordBlack
+        }
+
+topPromptXPConfig :: XPConfig
+topPromptXPConfig =
+    def
+        { font = myPromptFont
+        , promptBorderWidth = 0
+        , searchPredicate = fuzzyMatch
+        , sorter = fuzzySort
+        , maxComplRows = Just 10
+        , fgHLight = nordWhite
+        , bgHLight = nordColor4
+        , historySize = 10
+        , position = Top
+        , bgColor = nordBlack
+        }
+
+bottomPromptXPConfig :: XPConfig
+bottomPromptXPConfig =
+    def
+        { font = myPromptFont
+        , promptBorderWidth = 0
+        , searchPredicate = fuzzyMatch
+        , sorter = fuzzySort
+        , maxComplRows = Just 10
+        , fgHLight = nordWhite
+        , bgHLight = nordColor4
+        , historySize = 10
+        , position = Bottom
+        , bgColor = nordBlack
         }
 
 myVisualSubmapConfig =
@@ -294,13 +337,13 @@ mySubmaps =
       , subName "Search" . myVisualSubmap . M.fromList $
         [ ( (0, xK_g)
           , subName "Search on google" $
-            Sch.promptSearchBrowser myPromptXPConfig myBrowser Sch.google)
+            Sch.promptSearchBrowser centerPromptXPConfig myBrowser Sch.google)
         , ( (0, xK_h)
           , subName "Search on hoogle" $
-            Sch.promptSearchBrowser myPromptXPConfig myBrowser Sch.hoogle)
+            Sch.promptSearchBrowser centerPromptXPConfig myBrowser Sch.hoogle)
         , ( (0, xK_w)
           , subName "Search on wikipedia" $
-            Sch.promptSearchBrowser myPromptXPConfig myBrowser Sch.wikipedia)
+            Sch.promptSearchBrowser centerPromptXPConfig myBrowser Sch.wikipedia)
         ])
     -- translate
     , ( (0, xK_t)
@@ -315,12 +358,13 @@ mySubmaps =
     -- pass
     , ( (0, xK_p)
       , subName "Password Management" . myVisualSubmap . M.fromList $
-        [ ((0, xK_p), subName "Retrieve password" $ passPrompt myPromptXPConfig)
+        [ ( (0, xK_p)
+          , subName "Retrieve password" $ passPrompt bottomPromptXPConfig)
         , ( (0, xK_t)
-          , subName "Autofill password" $ passTypePrompt myPromptXPConfig)
+          , subName "Autofill password" $ passTypePrompt bottomPromptXPConfig)
         , ( (0, xK_g)
           , subName "Generate a new password" $
-            passGenerateAndCopyPrompt myPromptXPConfig)
+            passGenerateAndCopyPrompt bottomPromptXPConfig)
         ])
     ]
 
