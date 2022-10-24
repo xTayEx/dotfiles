@@ -10,6 +10,7 @@ import XMonad.Actions.CycleWS
 import XMonad.Actions.GridSelect
 import qualified XMonad.Actions.Search as Sch
 import XMonad.Actions.Submap
+import XMonad.Hooks.BorderPerWindow (actionQueue, defineBorderWidth)
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeInactive
@@ -212,6 +213,7 @@ myStatusBar = "xmobar /home/" ++ myUsername ++ "/.config/xmobar/xmobar.hs"
 --                 >> spawn "feh --bg-fill /home/xtayex/Pictures/wallpapers/yunnan001.jpg"
 myStartupHook :: X ()
 myStartupHook = do
+    spawn ("/home/" ++ myUsername ++ "/.config/xmobar/run_music.sh")
     spawn ("picom --config /home/" ++ myUsername ++ "/.config/picom.conf")
     -- spawn ("feh --bg-fill /home/" ++ myUsername ++ "/Pictures/wallpapers/" ++ myWallpaperPath)
     spawnOnce
@@ -278,6 +280,7 @@ myManageHook =
         , title =? "nmtui" --> doFloat
         , className =? "Zenity" --> doFloat
         , className =? "wemeetapp" --> doFloat
+        , className =? "wemeetapp" --> defineBorderWidth 0
         ]
 
 centerPromptXPConfig :: XPConfig
@@ -372,6 +375,7 @@ main :: IO ()
 main = do
     xmproc <- spawnPipe myStatusBar
     xmonad $
+        actionQueue $
         docks . ewmhFullscreen . ewmh $
         def
             { terminal = myTerminal
