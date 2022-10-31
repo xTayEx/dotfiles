@@ -1,40 +1,42 @@
-import Data.Char (isSpace)
-import Data.Foldable
-import qualified Data.Map as M
-import Data.Maybe
-import Data.Ratio ((%))
-import System.Exit
-import System.IO
-import XMonad
-import XMonad.Actions.CycleWS
-import XMonad.Actions.GridSelect
-import qualified XMonad.Actions.Search as Sch
-import XMonad.Actions.Submap
-import XMonad.Hooks.BorderPerWindow (actionQueue, defineBorderWidth)
-import XMonad.Hooks.DynamicLog
-import XMonad.Hooks.EwmhDesktops
-import XMonad.Hooks.FadeInactive
-import XMonad.Hooks.ManageDocks
-import XMonad.Hooks.SetWMName
-import XMonad.Hooks.StatusBar.PP
-import XMonad.Layout.Grid
-import XMonad.Layout.IM
-import XMonad.Layout.MultiColumns
-import XMonad.Layout.NoBorders
-import XMonad.Layout.PerWorkspace
-import XMonad.Layout.Reflect
-import XMonad.Layout.Spacing
-import XMonad.Layout.Tabbed
-import XMonad.Prompt
-import XMonad.Prompt.ConfirmPrompt
-import XMonad.Prompt.FuzzyMatch
-import XMonad.Prompt.Pass
-import qualified XMonad.StackSet as W
-import XMonad.Util.EZConfig
-import XMonad.Util.NamedScratchpad
-import XMonad.Util.Run
-import XMonad.Util.SpawnOnce
-import XMonad.Util.XUtils
+import           Data.Char                    (isSpace)
+import           Data.Foldable
+import qualified Data.Map                     as M
+import           Data.Maybe
+import           Data.Ratio                   ((%))
+import           System.Exit
+import           System.IO
+import           XMonad
+import           XMonad.Actions.CycleWS
+import           XMonad.Actions.GridSelect
+import qualified XMonad.Actions.Search        as Sch
+import           XMonad.Actions.Submap
+import           XMonad.Hooks.BorderPerWindow (actionQueue, defineBorderWidth)
+import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.EwmhDesktops
+import           XMonad.Hooks.FadeInactive
+import           XMonad.Hooks.ManageDocks
+import           XMonad.Hooks.SetWMName
+import           XMonad.Hooks.StatusBar.PP
+import           XMonad.Layout.Grid
+import           XMonad.Layout.IM
+import           XMonad.Layout.MultiColumns
+import           XMonad.Layout.NoBorders
+import           XMonad.Layout.PerWorkspace
+import           XMonad.Layout.Reflect
+import           XMonad.Layout.Spacing
+import           XMonad.Layout.Tabbed
+import           XMonad.Prompt
+import           XMonad.Prompt.Input
+import           XMonad.Prompt.ConfirmPrompt
+import           XMonad.Prompt.FuzzyMatch
+import           XMonad.Prompt.Pass
+import qualified XMonad.StackSet              as W
+import           XMonad.Prelude           (isPrefixOf)
+import           XMonad.Util.EZConfig
+import           XMonad.Util.NamedScratchpad
+import           XMonad.Util.Run
+import           XMonad.Util.SpawnOnce
+import           XMonad.Util.XUtils
 
 -- nord theme color
 nordColor1 :: String
@@ -213,8 +215,12 @@ myStatusBar = "xmobar /home/" ++ myUsername ++ "/.config/xmobar/xmobar.hs"
 --                 >> spawn "feh --bg-fill /home/xtayex/Pictures/wallpapers/yunnan001.jpg"
 myStartupHook :: X ()
 myStartupHook = do
-    spawn ("/home/" ++ myUsername ++ "/.config/xmobar/run_music.sh")
-    spawn ("picom --config /home/" ++ myUsername ++ "/.config/picom.conf")
+    spawnOnce
+        ("/home/" ++
+         myUsername ++
+         "/.config/xmobar/run_music.sh >> /home/" ++
+         myUsername ++ "/.config/xmobar/run_music.log")
+    spawnOnce ("picom --config /home/" ++ myUsername ++ "/.config/picom.conf")
     -- spawn ("feh --bg-fill /home/" ++ myUsername ++ "/Pictures/wallpapers/" ++ myWallpaperPath)
     spawnOnce
         ("/home/" ++
@@ -226,7 +232,8 @@ myStartupHook = do
         ("/home/" ++
          myUsername ++
          "/Downloads/Clash.for.Windows-0.19.14-x64-linux/clash_launch.sh")
-    spawn
+    spawnOnce
+    -- stalonetray is buggy! need to be fixed!
         ("stalonetray --config /home/" ++ myUsername ++ "/.config/stalonetrayrc")
     -- setWMName "LG3D"
 
@@ -245,11 +252,11 @@ myLogHook xmproc
             , ppLayout =
                   (\layoutName ->
                        case layoutName of
-                           "Spacing Tall" -> "Tall"
-                           "Spacing Grid" -> "Grid"
-                           "Spacing MultiCol" -> "MultiCol"
-                           "Spacing Full" -> "Full"
-                           "Spacing ReflectX Tall" -> "ReflectX Tall"
+                           "Spacing Tall"            -> "Tall"
+                           "Spacing Grid"            -> "Grid"
+                           "Spacing MultiCol"        -> "MultiCol"
+                           "Spacing Full"            -> "Full"
+                           "Spacing ReflectX Tall"   -> "ReflectX Tall"
                            "Spacing Tabbed Simplest" -> "Tabbed")
             }
 
@@ -282,6 +289,13 @@ myManageHook =
         , className =? "wemeetapp" --> doFloat
         , className =? "wemeetapp" --> defineBorderWidth 0
         ]
+
+-- prompt conig
+
+calcPrompt :: XPConfig -> String -> X ()
+calcPrompt c ans = 
+    inputPrompt c (myTrim ans) ?+ \input ->
+        liftIO(runProcessWithInput "qalc" [input] "") >>= calcPrompt c
 
 centerPromptXPConfig :: XPConfig
 centerPromptXPConfig =
@@ -369,6 +383,8 @@ mySubmaps =
           , subName "Generate a new password" $
             passGenerateAndCopyPrompt bottomPromptXPConfig)
         ])
+    , ( (0, xK_c)
+      , subName "Calculator" $ calcPrompt topPromptXPConfig "calc")
     ]
 
 main :: IO ()

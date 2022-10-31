@@ -1,0 +1,49 @@
+Config { 
+    font = "xft:FiraCode Nerd Font Mono:size=10", 
+    additionalFonts = [ 
+        "xft:Font Awesome 6 Free Solid:size=10", 
+        "xft:Font Awesome 6 Brands Regular:size=10",
+        "xft:Font Awesome 6 Free Regular:size=10"
+        "xft:Microsoft Yahei:size=10"
+    ],
+    alpha = 220, 
+    bgColor = "#333333", 
+    fgColor = "#ffffff", 
+    iconRoot = "/home/xtayex/.config/xmobar/icons/", 
+    border = NoBorder, 
+    position = TopSize C 100 24, 
+    lowerOnStart = True, 
+    allDesktops = True, 
+    commands = [ 
+        Run Date " <fn=1>\xf073</fn> %a %_d %b <fn=1>\xf017</fn> %H:%M" "date" 10, 
+        Run UnsafeStdinReader,
+        Run Cpu
+            [ "--template", "<action=`kitty htop` button=1><fn=1>\xf2db</fn></action> <total>%",
+              "-L", "3",
+              "-H", "50",
+              "--low", "#A3BE8C",
+              "--normal", "#EBCB8b",
+              "--high", "#BF616A"
+            ] 10,
+        Run Memory ["-t", "<action=`kitty htop` button=1><fn=1>\xf538</fn></action> <usedratio>%","-L","30","-H","80","--low","#A3BE8C","--normal","#EBCB8b","--high","#BF616A"] 10,
+        Run Wireless "wlp3s0" [ "-t", "<fn=1>\xf1eb</fn> <essid>" ] 10,
+        Run Battery [
+            "-t", "<action=`kitty yacpi` button=1><acstatus></action> <left>% - <timeleft>",
+            "--Low", "20",
+            "--High", "80",
+            "--",
+            -- "-i", "Full",
+            "-O", "<fn=1>\xf1e6</fn> Charging",
+            "-o", "<fn=1>\xf240</fn> Draining",
+            "--high", "#A3BE8C",
+            "--low", "#BF616A"
+        ] 10,
+        Run Com "/home/xtayex/.config/xmobar/cpu_temp.sh" [] "cpu_temp" 10,
+        Run Com "/home/xtayex/.config/xmobar/volume.sh" [] "volume" 10,
+        Run Com "/home/xtayex/.config/xmobar/brightness.sh" [] "brightness" 10,
+        Run Com "/home/xtayex/.config/xmobar/fan.sh" [] "fan" 10
+    ],
+    sepChar = "%", 
+    alignSep = "}{", 
+    template = "%UnsafeStdinReader% } { %cpu% %cpu_temp% %fan%  %memory%  %wlp3s0wi%  %battery%  %volume% %brightness%  %date% "
+}
